@@ -1,5 +1,5 @@
 # huaweicloud_garbage_classify_competiton
-introduction
+Introduction
 ------  
   This project is a conclusion about the experience in the competition["Huawei cloud artificial intelligence competition-Garbage sorting challenge cup](https://developer.huaweicloud.com/competition/competitions/1000007620/introduction).This issue contains 40 kinds of [garbage images](https://modelarts-competitions.obs.cn-north-1.myhuaweicloud.com/garbage_classify/dataset/garbage_classify.zip) gathered by daily life. Each pair of data includes a garbage image and its label file in TXT format within a line of image name and its corresponding digit label, such as 'image_0.jpg,0'(name,label).The index of data is not continous and the total number of images is about 14802.
 
@@ -158,7 +158,8 @@ predictions = Dense(FLAGS.num_classes, activation='softmax')(t)
 model = Model(inputs=inp, outputs=predictions)
 model.compile(loss=objective, optimizer=optimizer, metrics=metrics)
 ```
-But this way will lead to a large model size, which is not ideal.So we can also average several softmax outputs to obtain a ave prediction. By communicating with some competition participators, I got that [Efficientnet](https://arxiv.org/abs/1905.11946) was a pretty state of the art model with good performance. But what a pitty, the submission deadline has come.
+But this way will lead to a large model size, which is not ideal.So we can also average several softmax outputs to obtain a ave prediction. By communicating with some competition participators, I got that [Efficientnet](https://arxiv.org/abs/1905.11946) was a pretty state of the art model with good performance. But what a pitty, the submission deadline has come.The Efficientnet integrats several state of the art tricks, for example:width scaling, depth scaling, resolution scaling to learn full-scale features.
+![](https://github.com/lpf9562/huaweicloud_garbage_classify_competiton/blob/master/efficientnet.png)
 The baseline objective function is 'binary_crossentropy' which fits binary classification. For multi-classification we can use 'categorical_crossentropy'.[Keras_losses](https://keras.io/losses/)
 The keras provides several state of the art [optimizer](https://keras.io/zh/optimizers/), we can make a choice between Adam and Nadam.
 ```python
