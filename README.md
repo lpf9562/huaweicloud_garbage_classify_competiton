@@ -160,6 +160,7 @@ model.compile(loss=objective, optimizer=optimizer, metrics=metrics)
 ```
 But this way will lead to a large model size, which is not ideal.So we can also average several softmax outputs to obtain a ave prediction. By communicating with some competition participators, I got that [Efficientnet](https://arxiv.org/abs/1905.11946) was a pretty state of the art model with good performance. But what a pitty, the submission deadline has come.The Efficientnet integrats several state of the art tricks, for example:width scaling, depth scaling, resolution scaling to learn full-scale features.
 ![](https://github.com/lpf9562/huaweicloud_garbage_classify_competiton/blob/master/efficientnet.png)
+
 The baseline objective function is 'binary_crossentropy' which fits binary classification. For multi-classification we can use 'categorical_crossentropy'.[Keras_losses](https://keras.io/losses/)
 The keras provides several state of the art [optimizer](https://keras.io/zh/optimizers/), we can make a choice between Adam and Nadam.
 ```python
