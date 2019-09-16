@@ -8,4 +8,99 @@ Work
   This issue seems like a simple image classification problem. Mostly, the scheme of solving this kind of problems is split into the following steps.(Cite:[Scheme for Kaggle seedling classification contest](https://baijiahao.baidu.com/s?id=1604481732386439544&wfr=spider&for=pc))
 ### Data Statistic and Analysis
 Firstly, we need to do some data statistic and analysis before we build our model.I count the total image number for each class,and get the following data distribution histogram.
-![](https://github.com/lpf9562/huaweicloud_garbage_classify_competiton/master/data_distribution.png)
+![](https://github.com/lpf9562/huaweicloud_garbage_classify_competiton/blob/master/data_distribution.png)
+As we can see in the picture, the number of each class is not balanced.The max is 736 and the min is 85. So we need to make the data balanced. We can use minus data up-sampling to make it.The same as the next part-Data augmentation, we can use some python external lib such as keras-datagenerator, imgaug, or some manual functions by yourself. Besides, [t-distributed Stochastic Neighbor Embedding(t-SNE)](http://lvdmaaten.github.io/tsne/) is also a good method for data analysis. But some problems raised when I use this method, the cpu memory blowed up. Maybe the way I used was wrong.
+I wanted to make the data balanced, so I up-sampled minus image data with keras-ImageDataGenerator. The number of each class was increased to 10,000. But the result accuracy was not improved, reduced instead. So it illustrates that large amount of repeating image data can't help. 
+### Data Augmentation
+There are three kinds of data-aug method I used during the proceed.The first is keras-ImageDataGenerator.
+```python
+from keras.preprocessing.image import ImageDataGenerator
+datagen = ImageDataGenerator(rescale=1. / 255,#image channels normalization with divided by 255
+                             rotation_range=40,
+                             width_shift_range=0.2,
+                             height_shift_range=0.2,
+                             shear_range=0.2,#crop
+                             zoom_range=0.2,
+                             horizontal_flip=True,
+                             fill_mode='nearest')
+val_generator = datagen.flow(batch_x,batch_y,
+                             target_size=(img_size, img_size),
+                             save_to_dir='E:\garbage_classify\garbage_classify\\test',#augmented image address
+                             save_prefix='image',
+                             save_format='jpg',
+                             batch_size=40,
+                             shuffle=False)
+#or we can augment data from its directory
+val_generator = datagen.flow_from_directory(self, directory,
+                            target_size=(256, 256), color_mode='rgb',
+                            classes=None, class_mode='categorical',
+                            batch_size=32, shuffle=True, seed=None,
+                            save_to_dir=None,
+                            save_prefix='',
+                            save_format='jpeg',
+                            follow_links=False)
+#these two function will output a generator, so that we can us this for
+model.fit_generator(val_generator,
+                            steps_per_epoch = 100,
+                            epochs= 20,
+                            validation_data = validation_generator, 
+                            validation_steps= 50)
+#or we can use following function to applies a transformation to an image according to given parameters, this can be applied to sequence data input.
+img=datagen.apply_transform(x,parameters)
+```
+The second method for image-aug is imgaug, some blogger has summrized for a detailed reference [Imgaug data enhancement library - study notes](https://blog.csdn.net/qq_38451119/article/details/82428612):
+```python
+from imgaug import augmenters as iaa
+seq = iaa.Sequential([#iaa.OneOf,iaa.SomeOf
+    iaa.Crop(px=(0, 16)), # crop images from each side by 0 to 16px (randomly chosen)
+    iaa.Fliplr(0.5), # 0.5 is the probability, horizontally flip 50% of the images
+    iaa.GaussianBlur(sigma=(0, 3.0)) # blur images with a sigma of 0 to 3.0
+])
+```
+The last method for image-aug is self-manual augmentation method, the following is my method including rotation, flip, Gaussian blur, gamma_transform, add_noise or something else:
+```python
+    def gamma_transform(self,img, gamma=1):
+        gamma_table = [np.power(x / 255.0, gamma) * 255.0 for x in range(256)]
+        gamma_table = np.round(np.array(gamma_table)).astype(np.uint8)
+        return cv2.LUT(img, gamma_table)
+    def random_gamma_transform(self,img, gamma_vari=2):
+        log_gamma_vari = np.log(gamma_vari)
+        alpha = np.random.uniform(-log_gamma_vari, log_gamma_vari)
+        gamma = np.exp(alpha)
+        return self.gamma_transform(img, gamma)
+    def rotate(self,img,angle):
+        size=224
+        M_rotate = cv2.getRotationMatrix2D((size / 2, size / 2), angle, 1)
+        img = cv2.warpAffine(img, M_rotate, (size, size))
+        return img
+    def blur(self,img):
+        img = cv2.blur(img, (3, 3))
+        return img
+    def add_noise(self,img):
+        size=100
+        for i in range(size):  # 添加点噪声
+            temp_x = np.random.randint(0, img.shape[0])
+            temp_y = np.random.randint(0, img.shape[1])
+            img[temp_x][temp_y] = 255
+        return img
+    def data_augment(self,img):
+        if np.random.random() < 0.25:
+            img = self.rotate(img,90)
+        if np.random.random() < 0.25:
+            img = self.rotate(img, 180)
+        if np.random.random() < 0.25:
+            img = self.rotate(img, 270)
+        if np.random.random() < 0.25:
+            img = cv2.flip(img, 1)  # flipcode > 0：沿y轴翻转
+        if np.random.random() < 0.25:
+            img = self.random_gamma_transform(img, 1)
+        if np.random.random() < 0.25:
+            img = self.blur(img)
+        if np.random.random() < 0.25:
+            img = cv2.bilateralFilter(img, 9, 75, 75)
+        if np.random.random() < 0.25:
+            img = cv2.GaussianBlur(img, (5, 5), 0)
+        if np.random.random() < 0.2:
+            img = self.add_noise(img)
+        return img
+```
