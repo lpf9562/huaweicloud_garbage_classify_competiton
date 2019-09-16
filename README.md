@@ -8,3 +8,4 @@ Work
   This issue seems like a simple image classification problem. Mostly, the scheme of solving this kind of problems is split into the following steps.(Cite:[Scheme for Kaggle seedling classification contest](https://baijiahao.baidu.com/s?id=1604481732386439544&wfr=spider&for=pc))
 ### Data Statistic and Analysis
 Firstly, we need to do some data statistic and analysis before we build our model.I count the total image number for each class,and get the following data distribution histogram.
+![](https://github.com/lpf9562/huaweicloud_garbage_classify_competiton/master/data_distribution.png)
