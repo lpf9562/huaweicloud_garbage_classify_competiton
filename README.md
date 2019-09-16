@@ -169,5 +169,5 @@ Conclusion and Future Work
 ---------
 This is my first time to attend this kind of AI image processing competition. Because lacking of experience and corresponding knowledge,
 the final best score was 87% in rank 156. 
-
+![](https://github.com/lpf9562/huaweicloud_garbage_classify_competiton/blob/master/score.png)
 There is still very much to learn, write this repository to record what I obtained during this proceeding. I feel appreciate for it much. 
