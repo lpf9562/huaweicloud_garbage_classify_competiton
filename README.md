@@ -12,7 +12,7 @@ Firstly, we need to do some data statistic and analysis before we build our mode
 As we can see in the picture, the number of each class is not balanced.The max is 736 and the min is 85. So we need to make the data balanced. We can use minus data up-sampling to make it.The same as the next part-Data augmentation, we can use some python external lib such as keras-datagenerator, imgaug, or some manual functions by yourself. Besides, [t-distributed Stochastic Neighbor Embedding(t-SNE)](http://lvdmaaten.github.io/tsne/) is also a good method for data analysis. But some problems raised when I use this method, the cpu memory blowed up. Maybe the way I used was wrong.
 I wanted to make the data balanced, so I up-sampled minus image data with keras-ImageDataGenerator. The number of each class was increased to 10,000. But the result accuracy was not improved, reduced instead. So it illustrates that large amount of repeating image data can't help. 
 ### Data Augmentation
-There are three kinds of data-aug method I used during the proceed.The first is keras-ImageDataGenerator.
+This a significant part for data processing science. There are three kinds of data-aug method I used during the proceed.The first is keras-ImageDataGenerator.
 ```python
 from keras.preprocessing.image import ImageDataGenerator
 datagen = ImageDataGenerator(rescale=1. / 255,#image channels normalization with divided by 255
@@ -104,3 +104,6 @@ The last method for image-aug is self-manual augmentation method, the following 
             img = self.add_noise(img)
         return img
 ```
+By applying data augmentation the test accuracy will be improved by at least 3%.
+### Build Model
+Official Huawei Cloud provided a baseline built by resnet-50.Run the baseline we can get a score with 66%, which is not enough at all.So I decided to change the model.But simply using one model may not learn whole image feature, I used the model stacking technology. [Keras application](https://keras.io/applications/) has provided some state of the art model and their trained weighted on imageNet, which is convenient and useful.
